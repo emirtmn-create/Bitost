@@ -17,8 +17,8 @@ jobs:
 
       - name: Proje ZIP dosyasini ac
         run: |
-        ZIP_FILE=$(find . -maxdepth 1 -iname "BiTost_Kasa_V3_KURULUM_FIX*.zip" | head -n 1)
 
+        ZIP_FILE=$(find . -maxdepth 1 -iname "BiTost_Kasa_V3_KURULUM_FIX*.zip" | head -n 1)
         
          
           echo "Bulunan ZIP: $ZIP_FILE"
