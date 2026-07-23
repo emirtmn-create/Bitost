@@ -1,1 +1,46 @@
 
+name: BiTost APK Olustur
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Dosyalari al
+        uses: actions/checkout@v4
+
+      - name: Proje ZIP dosyasini ac
+        run: |
+          ZIP_FILE=$(find . -maxdepth 1 -iname "BiTost_Android_GitHub_APK_Hazir*.zip" | head -n 1)
+          echo "Bulunan ZIP: $ZIP_FILE"
+          test -n "$ZIP_FILE"
+          unzip -o "$ZIP_FILE" -d .
+
+      - name: Java 17 kur
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Android SDK kur
+        uses: android-actions/setup-android@v3
+
+      - name: Gradle 8.9 kur
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
+      - name: APK olustur
+        run: gradle assembleDebug
+
+      - name: APK dosyasini hazirla
+        uses: actions/upload-artifact@v4
+        with:
+          name: BiTost-Yonetim-APK
+          path: app/build/outputs/apk/debug/app-debug.apk
