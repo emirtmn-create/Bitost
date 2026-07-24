@@ -1,5 +1,4 @@
-
-name: BiTost APK Olustur
+name: BiTost APK Build
 
 on:
   workflow_dispatch:
@@ -12,38 +11,46 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Dosyalari al
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Proje ZIP dosyasini ac
+      - name: Extract project ZIP
+        shell: bash
         run: |
-
-        ZIP_FILE=$(find . -maxdepth 1 -iname "BiTost_Kasa_V3_KURULUM_FIX*.zip" | head -n 1)
-        
-         
-          echo "Bulunan ZIP: $ZIP_FILE"
+          ZIP_FILE=$(find . -maxdepth 1 -type f -iname "BiTost_Kasa_V3_KURULUM_FIX*.zip" | head -n 1)
+          echo "ZIP found: $ZIP_FILE"
           test -n "$ZIP_FILE"
-          unzip -o "$ZIP_FILE" -d .
+          rm -rf extracted
+          mkdir extracted
+          unzip -o "$ZIP_FILE" -d extracted
+          PROJECT_DIR=$(dirname "$(find extracted -name settings.gradle -print -quit)")
+          echo "Project directory: $PROJECT_DIR"
+          test -f "$PROJECT_DIR/settings.gradle"
+          echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
 
-      - name: Java 17 kur
+      - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
 
-      - name: Android SDK kur
+      - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Gradle 8.9 kur
+      - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: "8.9"
 
-      - name: APK olustur
-        run: gradle assembleDebug
+      - name: Build APK
+        shell: bash
+        run: |
+          cd "$PROJECT_DIR"
+          gradle assembleDebug
 
-      - name: APK dosyasini hazirla
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: BiTost-Yonetim-APK
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: BiTost-Kasa-APK
+          path: extracted/**/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
